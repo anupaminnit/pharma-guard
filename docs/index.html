@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PharmaGuard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e17;--panel:#111520;--card:#161b2a;--hover:#1c2236;
+  --border:#1f2740;--border-lit:#2a3558;
+  --text:#e8ecf4;--muted:#7a8aaa;--faint:#454e68;
+  --green:#00e5a0;--amber:#f5a623;--red:#ff4444;--blue:#4a90d9;
+  --ui:'DM Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.hdr-brand{display:flex;align-items:center;gap:12px}
+.brand-icon{font-size:22px;color:var(--green);font-family:var(--mono)}
+.hdr h1{font-size:16px;font-weight:700;letter-spacing:.12em;font-family:var(--mono)}
+.accent{color:var(--green)}
+.hdr-sub{font-size:10px;color:var(--muted);letter-spacing:.06em;margin-top:2px}
+.hdr-right{display:flex;gap:8px;align-items:center}
+.badge{font-family:var(--mono);font-size:9px;padding:3px 7px;border:1px solid var(--border-lit);border-radius:4px;color:var(--muted)}
+.badge-live{border-color:var(--green);color:var(--green);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* LAYOUT */
+.main{display:grid;grid-template-columns:360px 1fr;min-height:calc(100vh - 51px)}
+.panel{padding:20px;border-right:1px solid var(--border);height:calc(100vh - 51px);overflow-y:auto}
+.panel-r{border-right:none}
+
+/* FORM */
+.lbl{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);margin-bottom:7px}
+.sec{margin-bottom:18px}
+textarea.inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:10.5px;line-height:1.7;padding:10px;resize:vertical;outline:none;transition:border .15s}
+textarea.inp:focus{border-color:var(--border-lit)}
+select.inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:9px 10px;outline:none;cursor:pointer}
+
+/* UPLOAD */
+.dropzone{border:1.5px dashed var(--border-lit);border-radius:8px;padding:18px;cursor:pointer;transition:all .15s;background:var(--card);text-align:center}
+.dropzone:hover,.dropzone.over{border-color:var(--green);background:rgba(0,229,160,.04)}
+.dropzone.has-file{border-style:solid}
+.dz-icon{font-size:20px;color:var(--green);display:block;margin-bottom:6px}
+.dz-text{font-size:11px;color:var(--muted);display:block;margin-bottom:3px}
+.dz-hint{font-size:10px;color:var(--faint);font-family:var(--mono)}
+.dz-file{display:flex;align-items:center;gap:10px;text-align:left}
+.dz-fname{font-size:12px;font-weight:600}
+.dz-fsize{font-size:10px;color:var(--muted);font-family:var(--mono)}
+.dz-replace{font-size:10px;color:var(--faint);margin-left:auto}
+#file-input{display:none}
+
+/* BUTTON */
+.run-btn{width:100%;background:var(--green);color:#0b0e17;border:none;border-radius:6px;padding:12px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.run-btn:hover:not(:disabled){background:#00ffc4;transform:translateY(-1px)}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;background:var(--card);color:var(--green);border:1px solid var(--green)}
+.spin{width:13px;height:13px;border:2px solid rgba(0,229,160,.3);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{margin-top:10px;background:rgba(255,68,68,.1);border:1px solid var(--red);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--red)}
+
+/* SCORE HEADER */
+.score-hdr{display:flex;align-items:center;gap:18px;padding:18px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:14px}
+.score-ring{position:relative;width:76px;height:76px;flex-shrink:0}
+.score-ring svg{width:100%;height:100%}
+.score-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:19px;font-weight:600}
+.score-status{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.1em;margin-bottom:3px}
+.score-lang{font-size:11px;color:var(--muted);margin-bottom:5px}
+.score-sum{font-size:10.5px;color:var(--faint);line-height:1.5}
+
+/* TABS */
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:7px 13px;color:var(--muted);font-size:11px;cursor:pointer;transition:all .15s;margin-bottom:-1px;font-family:var(--ui)}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tab-body{overflow-y:auto;max-height:calc(100vh - 290px)}
+
+/* REPORT BLOCKS */
+.rblock{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:13px}
+.rblock-hdr{display:flex;align-items:center;gap:7px;margin-bottom:12px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--muted)}
+.rblock-score{margin-left:auto;color:var(--text);font-size:12px}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.chip{display:flex;align-items:center;gap:4px;padding:3px 7px;background:var(--hover);border:1px solid var(--border-lit);border-radius:20px;font-size:10px}
+.chip-status{font-size:9px}
+.chip-name{color:var(--muted)}
+.chip-pct{color:var(--faint);font-family:var(--mono);font-size:9px}
+
+/* DISC CARDS */
+.disc-list{margin-top:4px}
+.list-ttl{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--faint);margin-bottom:6px}
+.disc{border-left:3px solid;border-radius:6px;padding:9px 11px;margin-bottom:7px}
+.disc-hdr{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.disc-sev{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.08em}
+.disc-sect{font-size:11px;font-weight:600}
+.disc-loc{font-size:10px;color:var(--muted);margin-left:auto}
+.disc-issue{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:3px}
+.disc-rec{font-size:10.5px;color:var(--amber);font-style:italic}
+
+/* COMPLIANT */
+.comp-list{margin-bottom:10px}
+.comp-row{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
+.comp-icon{color:var(--green);flex-shrink:0}
+.comp-name{font-weight:500;flex-shrink:0}
+.comp-note{color:var(--faint);font-size:10px;margin-left:auto}
+.all-clear{font-size:11px;color:var(--green);padding:6px 0}
+.reg-ctx{margin-top:8px;font-size:10px;color:var(--faint);border-top:1px solid var(--border);padding-top:7px;font-family:var(--mono)}
+
+/* BACKTRANSLATION */
+details summary{font-size:10px;color:var(--muted);cursor:pointer;font-family:var(--mono);margin-top:10px;border-top:1px solid var(--border);padding-top:8px}
+pre.bt{font-family:var(--mono);font-size:9.5px;line-height:1.6;color:var(--muted);white-space:pre-wrap;max-height:180px;overflow-y:auto;margin-top:7px}
+
+/* PDF VIEWER */
+.pdf-wrap{position:relative;background:#fff;border-radius:6px;overflow:hidden}
+.pdf-img{width:100%;display:block}
+.pdf-overlay{position:absolute;border-radius:3px;cursor:help}
+.ovr-lbl{font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 4px;background:rgba(0,0,0,.75);border-radius:2px;white-space:nowrap;position:absolute;top:2px;left:2px}
+.pdf-legend{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:8px}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-sw{width:13px;height:13px;border-radius:2px;display:inline-block}
+.pdf-empty{padding:24px;text-align:center;color:var(--faint);font-size:11px}
+
+/* AGENT LOG */
+.log{display:flex;flex-direction:column;gap:2px}
+.log-entry{display:flex;gap:7px;padding:5px 7px;border-radius:4px;background:var(--card);border-left:2px solid var(--log-clr)}
+.log-pfx{font-family:var(--mono);font-size:11px;color:var(--log-clr);flex-shrink:0;margin-top:1px}
+.log-agent{font-size:9px;font-weight:700;color:var(--log-clr);font-family:var(--mono)}
+.log-div{font-size:9px;color:var(--faint)}
+.log-step{font-size:10.5px}
+.log-detail{font-size:9px;color:var(--muted);font-family:var(--mono)}
+
+/* IDLE / EMPTY */
+.empty{display:flex;align-items:center;justify-content:center;height:100%;min-height:280px}
+.idle{text-align:center;color:var(--muted)}
+.idle-ico{font-size:36px;color:var(--border-lit);margin-bottom:14px}
+.idle p{font-size:12px;margin-bottom:5px}
+.idle .sub{font-size:10px;color:var(--faint);font-family:var(--mono)}
+.pulse{width:44px;height:44px;border-radius:50%;border:3px solid var(--green);margin:0 auto 18px;animation:pulse 1.2s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:.3}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border-lit);border-radius:2px}
+</style>
+</head>
+<body>
+
+
+<div id="apiKeyBanner" style="background:#0d1220;border-bottom:1px solid #2a3558;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+  <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a8aaa;letter-spacing:.08em;white-space:nowrap">🔑 ANTHROPIC API KEY</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." 
+    style="flex:1;min-width:260px;background:#161b2a;border:1px solid #2a3558;border-radius:5px;color:#e8ecf4;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 10px;outline:none"
+    oninput="localStorage.setItem('pg_apikey',this.value)"
+  >
+  <span style="font-size:10px;color:#454e68;font-family:'IBM Plex Mono',monospace">Get yours at console.anthropic.com · Stored locally in your browser only</span>
+</div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('pg_apikey');
+    if (saved) document.getElementById('apiKeyInput').value = saved;
+  });
+</script>
+
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="brand-icon">⊕</div>
+    <div>
+      <h1>PHARMA<span class="accent">GUARD</span></h1>
+      <div class="hdr-sub">Multilingual Packaging Compliance Agent</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span class="badge badge-live">● LIVE DEMO</span>
+    <span class="badge">Powered by Claude claude-sonnet-4-20250514</span>
+  </div>
+</header>
+
+<div class="main">
+  <!-- LEFT: Inputs -->
+  <div class="panel">
+    <div class="sec">
+      <label class="lbl">SOURCE OF TRUTH — MASTER ENGLISH LABEL</label>
+      <textarea class="inp" id="masterLabel" rows="13">IBUPROFEN 400mg Film-coated Tablets
+
+ACTIVE INGREDIENT: Ibuprofen 400mg per tablet
+
+INDICATIONS: Relief of mild to moderate pain including headache, dental pain, period pain, back pain. Symptomatic relief of osteoarthritis. Reduction of fever.
+
+DOSAGE: Adults 12yrs+: 1-2 tablets up to 3 times daily.
+Do not exceed 6 tablets (2400mg) in 24 hours.
+
+WARNINGS:
+⚠ Do not use if allergic to ibuprofen or other NSAIDs.
+⚠ Not recommended in renal impairment (CrCl <30 mL/min).
+⚠ Increased cardiovascular thrombotic risk at higher doses.
+⚠ Contains lactose.
+⚠ Do not use during last 3 months of pregnancy.
+
+CONTRAINDICATIONS: Active peptic ulcer, severe hepatic/renal/cardiac failure.
+
+STORAGE: Below 25°C. Keep out of reach of children.
+
+MANUFACTURER: Viatris Pharmaceuticals Ltd.</textarea>
+    </div>
+
+    <div class="sec">
+      <label class="lbl">TARGET LANGUAGE</label>
+      <select class="inp" id="langSelect">
+        <option>French</option><option>German</option><option>Japanese</option>
+        <option>Spanish</option><option>Portuguese</option><option>Arabic</option>
+        <option>Chinese</option><option>Russian</option><option>Italian</option><option>Korean</option>
+      </select>
+    </div>
+
+    <div class="sec">
+      <label class="lbl">REGIONAL PACKAGING ARTWORK (or paste text below)</label>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+        <span class="dz-icon">⊕</span>
+        <span class="dz-text">Drag image/PDF or click to upload</span>
+        <span class="dz-hint">PNG · JPG · PDF accepted</span>
+      </div>
+      <input type="file" id="file-input" accept="image/*,.pdf">
+    </div>
+
+    <div class="sec">
+      <label class="lbl">— OR — PASTE FOREIGN LABEL TEXT DIRECTLY</label>
+      <textarea class="inp" id="foreignText" rows="5" placeholder="Paste French/Japanese/etc packaging text here if no image uploaded...">IBUPROFÈNE 400 mg Comprimés pelliculés
+
+SUBSTANCE ACTIVE : Ibuprofène 400 mg par comprimé
+
+INDICATIONS : Douleurs légères à modérées, maux de tête, douleurs dentaires, douleurs menstruelles, lombalgies. Réduction de la fièvre.
+
+POSOLOGIE : Adultes : 1 à 2 comprimés, 3 fois par jour maximum.
+Ne pas dépasser 4 comprimés (1600 mg) par 24 heures.
+
+MISES EN GARDE :
+⚠ Ne pas utiliser en cas d'allergie aux AINS.
+⚠ Risque cardiovasculaire accru.
+⚠ Contient du lactose.
+⚠ Ne pas utiliser pendant les 3 derniers mois de grossesse.
+
+CONTRE-INDICATIONS : Ulcère gastro-duodénal actif.
+
+CONSERVATION : Conserver à moins de 25°C.
+
+FABRICANT : Viatris Pharmaceuticals Ltd.</textarea>
+    </div>
+
+    <button class="run-btn" id="runBtn" onclick="runAnalysis()">
+      ⊛ RUN COMPLIANCE CHECK
+    </button>
+    <div id="errMsg" class="err" style="display:none"></div>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="panel panel-r" id="rightPanel">
+    <div class="empty" id="emptyState">
+      <div class="idle">
+        <div class="idle-ico">⊕</div>
+        <p>Upload packaging artwork and run compliance check</p>
+        <p class="sub">Translation Agent + Vision Agent will analyze sequentially</p>
+      </div>
+    </div>
+
+    <div id="resultsPanel" style="display:none">
+      <!-- Score header injected here -->
+      <div id="scoreHdr"></div>
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('report',this)">📋 Report</button>
+        <button class="tab" onclick="showTab('artwork',this)">📄 Artwork</button>
+        <button class="tab" onclick="showTab('log',this)">🤖 Agent Log</button>
+      </div>
+      <div class="tab-body">
+        <div id="tab-report"></div>
+        <div id="tab-artwork" style="display:none"></div>
+        <div id="tab-log" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let uploadedFile = null;
+let uploadedURL = null;
+let analysisResult = null;
+let agentLog = [];
+
+// Drag & drop
+const dz = document.getElementById('dropzone');
+const fi = document.getElementById('file-input');
+
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+fi.addEventListener('change', () => { if (fi.files[0]) setFile(fi.files[0]); });
+
+function setFile(f) {
+  uploadedFile = f;
+  uploadedURL = URL.createObjectURL(f);
+  dz.classList.add('has-file');
+  dz.innerHTML = `<div class="dz-file"><span style="font-size:18px">📄</span><div><div class="dz-fname">${f.name}</div><div class="dz-fsize">${(f.size/1024).toFixed(1)} KB</div></div><span class="dz-replace">Click to replace</span></div>`;
+}
+
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  ['report','artwork','log'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t === tab ? '' : 'none';
+  });
+}
+
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result.split(',')[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function runAnalysis() {
+  const masterLabel = document.getElementById('masterLabel').value.trim();
+  const targetLang = document.getElementById('langSelect').value;
+  const foreignText = document.getElementById('foreignText').value.trim();
+
+  if (!masterLabel) { showErr('Please enter master English label text.'); return; }
+  if (!uploadedFile && !foreignText) { showErr('Please upload packaging artwork or paste foreign text.'); return; }
+
+  clearErr();
+  setRunning(true);
+  agentLog = [];
+  showLog();
+
+  // Show results panel early for log streaming
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsPanel').style.display = '';
+  document.getElementById('scoreHdr').innerHTML = '';
+  document.getElementById('tab-report').innerHTML = '';
+  document.getElementById('tab-artwork').innerHTML = '';
+  document.getElementById('tab-log').innerHTML = renderLog([]);
+
+  // Show analyzing state in score area
+  document.getElementById('scoreHdr').innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;padding:16px;background:var(--card);border-radius:10px;border:1px solid var(--border);margin-bottom:14px">
+      <div class="pulse" style="width:50px;height:50px;flex-shrink:0;margin:0"></div>
+      <div><div style="font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.1em">ANALYZING...</div><div style="font-size:10px;color:var(--faint);margin-top:4px">Running agents sequentially</div></div>
+    </div>`;
+
+  try {
+    let imageContent = null;
+    if (uploadedFile) {
+      const b64 = await fileToBase64(uploadedFile);
+      const mt = uploadedFile.type.startsWith('image/') ? uploadedFile.type : 'image/jpeg';
+      imageContent = { b64, mt };
+    }
+
+    addLog('Orchestrator', 'File received', uploadedFile ? `Processing ${uploadedFile.name}` : 'Using pasted text input', 'info');
+    updateLogDisplay();
+
+    // Build prompt
+    const prompt = buildPrompt(masterLabel, foreignText, targetLang, !!imageContent);
+
+    addLog('Translation Agent', 'Back-translation', `Translating ${targetLang} → English for semantic comparison...`, 'running');
+    addLog('Vision Agent', 'Layout analysis', 'Checking font sizes, warning placement, regulatory elements...', 'running');
+    updateLogDisplay();
+
+    // Call Anthropic API
+    const messages = imageContent
+      ? [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: imageContent.mt, data: imageContent.b64 } },
+          { type: 'text', text: prompt }
+        ]}]
+      : [{ role: 'user', content: prompt }];
+
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    if (!apiKey) { throw new Error('Enter your Anthropic API key in the field above before running.'); }
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4096,
+        system: SYSTEM_PROMPT,
+        messages
+      })
+    });
+
+    if (!resp.ok) {
+      const e = await resp.json();
+      throw new Error(e.error?.message || 'API error');
+    }
+
+    const data = await resp.json();
+    const raw = data.content[0].text;
+    const result = parseJSON(raw);
+    analysisResult = result;
+
+    const discCount = (result.translation?.discrepancies?.length || 0);
+    const issueCount = (result.vision?.issues?.length || 0);
+
+    addLog('Translation Agent', 'Semantic comparison complete', `Found ${discCount} discrepancy(ies)`, discCount > 0 ? 'warning' : 'success');
+    addLog('Vision Agent', 'Layout analysis complete', `Found ${issueCount} layout issue(s)`, issueCount > 0 ? 'warning' : 'success');
+    addLog('Orchestrator', 'Analysis complete', `Overall compliance score: ${result.overall_score?.toFixed(1) ?? '—'}%`, 'success');
+    updateLogDisplay();
+
+    renderResults(result, targetLang);
+  } catch(err) {
+    addLog('Orchestrator', 'Error', err.message, 'error');
+    updateLogDisplay();
+    showErr(err.message);
+    document.getElementById('scoreHdr').innerHTML = '';
+  } finally {
+    setRunning(false);
+  }
+}
+
+const SYSTEM_PROMPT = `You are a pharmaceutical packaging compliance expert. Analyze packaging labels and return ONLY valid JSON — no markdown, no preamble.
+
+Respond with this exact schema:
+{
+  "overall_score": 85.0,
+  "overall_status": "needs_review",
+  "translation": {
+    "semantic_score": 82.0,
+    "back_translated_text": "English back-translation here",
+    "sections": [
+      {"section": "Active Ingredients", "status": "compliant", "confidence": 98.0, "issue": null},
+      {"section": "Dosage", "status": "compliant", "confidence": 95.0, "issue": null},
+      {"section": "Warnings", "status": "non_compliant", "confidence": 70.0, "issue": "Missing renal warning"}
+    ],
+    "discrepancies": [
+      {
+        "severity": "critical",
+        "section": "Warnings",
+        "explanation": "The renal impairment warning (CrCl <30 mL/min) is completely absent from the local label",
+        "recommendation": "Add: 'Not recommended in patients with renal impairment (CrCl <30 mL/min)'"
+      }
+    ],
+    "omissions": ["Renal impairment warning"],
+    "additions": []
+  },
+  "vision": {
+    "layout_score": 90.0,
+    "regulatory_context": "EU/France — EMA guidelines apply",
+    "issues": [
+      {
+        "element": "Dosage Overdose Limit",
+        "severity": "major",
+        "issue": "Local label states 4 tablets max (1600mg) instead of 6 tablets (2400mg) as per master",
+        "recommendation": "Correct maximum daily dose to 6 tablets / 2400mg",
+        "location": "dosage section",
+        "bounding_box": {"x": 5, "y": 30, "width": 88, "height": 10}
+      }
+    ],
+    "compliant_elements": [
+      {"element": "Active Ingredient", "note": "Correctly stated as Ibuprofen 400mg", "bounding_box": {"x": 5, "y": 10, "width": 88, "height": 8}},
+      {"element": "Storage Conditions", "note": "Below 25°C correctly stated", "bounding_box": {"x": 5, "y": 80, "width": 88, "height": 7}},
+      {"element": "Manufacturer", "note": "Viatris identified correctly", "bounding_box": {"x": 5, "y": 90, "width": 88, "height": 6}}
+    ],
+    "missing_elements": []
+  },
+  "summary": "Brief 1-sentence summary of findings"
+}
+
+Status must be: "compliant" (score>=90), "needs_review" (70-89), or "non_compliant" (<70).
+Severity must be: "critical", "major", or "minor".
+Bounding boxes are percentage-based (0-100) relative to image dimensions.`;
+
+function buildPrompt(master, foreign, lang, hasImage) {
+  return `MASTER ENGLISH LABEL (Source of Truth):
+---
+${master}
+---
+
+LOCAL ${lang.toUpperCase()} PACKAGING TEXT:
+---
+${foreign || '[See uploaded image — extract and analyze text from the packaging artwork]'}
+---
+
+Task:
+1. Back-translate the ${lang} text to English
+2. Perform section-by-section semantic medical intent comparison (NOT word-for-word)
+3. Flag any discrepancies that alter medical meaning, especially around warnings, dosage, contraindications
+4. ${hasImage ? 'Analyze the visual layout of the packaging for regulatory compliance (font size, warning placement, required elements)' : 'Estimate layout compliance based on text analysis'}
+5. Calculate overall compliance score
+
+Return ONLY the JSON schema specified in your system prompt.`;
+}
+
+function parseJSON(raw) {
+  const cleaned = raw.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();
+  try { return JSON.parse(cleaned); }
+  catch(e) {
+    return {
+      overall_score: 0, overall_status: 'non_compliant',
+      translation: { semantic_score: 0, back_translated_text: '', sections: [], discrepancies: [{ severity: 'critical', section: 'Parser', explanation: 'Failed to parse AI response: ' + raw.slice(0,200), recommendation: 'Retry' }], omissions: [], additions: [] },
+      vision: { layout_score: 0, regulatory_context: '', issues: [], compliant_elements: [], missing_elements: [] },
+      summary: 'Parse error — retry'
+    };
+  }
+}
+
+const SEV = {
+  critical: { color: '#ff4444', bg: 'rgba(255,68,68,.08)', icon: '🔴', label: 'CRITICAL' },
+  major:    { color: '#ff8c00', bg: 'rgba(255,140,0,.08)', icon: '🟠', label: 'MAJOR' },
+  minor:    { color: '#f5a623', bg: 'rgba(245,166,35,.08)', icon: '🟡', label: 'MINOR' },
+  critical2:{ color: '#ff4444', bg: 'rgba(255,68,68,.08)', icon: '🔴', label: 'CRITICAL' },
+};
+const STA = { compliant: '#00e5a0', non_compliant: '#ff4444', needs_review: '#f5a623' };
+
+function renderResults(r, lang) {
+  const sc = r.overall_score ?? 0;
+  const st = r.overall_status ?? 'needs_review';
+  const clr = STA[st] || '#888';
+  const circ = (sc / 100) * 264;
+
+  document.getElementById('scoreHdr').innerHTML = `
+    <div class="score-hdr">
+      <div class="score-ring">
+        <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1a1f2e" stroke-width="8"/>
+        <circle cx="50" cy="50" r="42" fill="none" stroke="${clr}" stroke-width="8" stroke-dasharray="${circ} 264" stroke-linecap="round" transform="rotate(-90 50 50)"/></svg>
+        <div class="score-val" style="color:${clr}">${sc.toFixed(0)}</div>
+      </div>
+      <div>
+        <div class="score-status" style="color:${clr}">${st.replace(/_/g,' ').toUpperCase()}</div>
+        <div class="score-lang">${lang} packaging vs. English master</div>
+        <div class="score-sum">${r.summary || ''}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('tab-report').innerHTML = renderReport(r);
+  document.getElementById('tab-artwork').innerHTML = renderArtwork(r);
+  updateLogDisplay();
+
+  document.getElementById('resultsPanel').style.display = '';
+}
+
+function renderReport(r) {
+  const tr = r.translation || {};
+  const vi = r.vision || {};
+  const discs = tr.discrepancies || [];
+  const sects = tr.sections || [];
+  const issues = vi.issues || [];
+  const comps = vi.compliant_elements || [];
+
+  let chips = sects.map(s => {
+    const c = STA[s.status] || '#888';
+    const ico = s.status === 'compliant' ? '✓' : s.status === 'non_compliant' ? '✗' : '⚠';
+    return `<div class="chip" style="--c:${c}"><span class="chip-status" style="color:${c}">${ico}</span><span class="chip-name">${s.section}</span><span class="chip-pct">${(s.confidence||0).toFixed(0)}%</span></div>`;
+  }).join('');
+
+  let discHTML = discs.length ? `<p class="list-ttl">DISCREPANCIES (${discs.length})</p>` + discs.map(d => {
+    const sv = SEV[d.severity] || SEV.minor;
+    return `<div class="disc" style="border-color:${sv.color};background:${sv.bg}">
+      <div class="disc-hdr"><span class="disc-sev" style="color:${sv.color}">${sv.icon} ${sv.label}</span><span class="disc-sect">${d.section||''}</span></div>
+      <div class="disc-issue">${d.explanation||''}</div>
+      ${d.recommendation ? `<div class="disc-rec">→ ${d.recommendation}</div>` : ''}
+    </div>`;
+  }).join('') : '<div class="all-clear">✓ No translation discrepancies</div>';
+
+  let compHTML = comps.length ? `<div class="comp-list">${comps.map(c=>`<div class="comp-row"><span class="comp-icon">✓</span><span class="comp-name">${c.element}</span>${c.note?`<span class="comp-note">${c.note}</span>`:''}</div>`).join('')}</div>` : '';
+  let issHTML = issues.length ? `<p class="list-ttl">LAYOUT ISSUES (${issues.length})</p>` + issues.map(d => {
+    const sv = SEV[d.severity] || SEV.minor;
+    return `<div class="disc" style="border-color:${sv.color};background:${sv.bg}">
+      <div class="disc-hdr"><span class="disc-sev" style="color:${sv.color}">${sv.icon} ${sv.label}</span><span class="disc-sect">${d.element||''}</span>${d.location?`<span class="disc-loc">@ ${d.location}</span>`:''}</div>
+      <div class="disc-issue">${d.issue||''}</div>
+      ${d.recommendation ? `<div class="disc-rec">→ ${d.recommendation}</div>` : ''}
+    </div>`;
+  }).join('') : '<div class="all-clear">✓ No layout issues detected</div>';
+
+  const bt = tr.back_translated_text || '';
+
+  return `
+    <div class="rblock">
+      <div class="rblock-hdr"><span>🔤</span> TRANSLATION INTEGRITY <span class="rblock-score">${(tr.semantic_score||0).toFixed(1)}%</span></div>
+      ${chips ? `<div class="chips">${chips}</div>` : ''}
+      <div class="disc-list">${discHTML}</div>
+      ${bt ? `<details><summary>View back-translation ▸</summary><pre class="bt">${bt}</pre></details>` : ''}
+    </div>
+    <div class="rblock">
+      <div class="rblock-hdr"><span>👁</span> LAYOUT & FORMATTING <span class="rblock-score">${(vi.layout_score||0).toFixed(1)}%</span></div>
+      ${compHTML}
+      <div class="disc-list">${issHTML}</div>
+      ${vi.regulatory_context ? `<div class="reg-ctx">📋 ${vi.regulatory_context}</div>` : ''}
+    </div>`;
+}
+
+function renderArtwork(r) {
+  if (!uploadedURL) {
+    return `<div class="pdf-empty">No image uploaded — compliance based on text analysis only.</div>`;
+  }
+  const vi = r.vision || {};
+  const overlays = [
+    ...(vi.compliant_elements||[]).filter(e=>e.bounding_box).map(e=>({...e, type:'ok', bc:'#00e5a0', bg:'rgba(0,229,160,.2)'})),
+    ...(vi.issues||[]).filter(e=>e.bounding_box).map(e=>({...e, type:'bad', bc:'#ff4444', bg:'rgba(255,68,68,.18)'})),
+  ];
+  const ovrs = overlays.map(el => {
+    const b = el.bounding_box;
+    return `<div class="pdf-overlay" title="${el.issue||el.note||el.element}" style="left:${b.x}%;top:${b.y}%;width:${b.width}%;height:${b.height}%;background:${el.bg};border:2px solid ${el.bc}">
+      <span class="ovr-lbl" style="color:${el.bc}">${el.type==='ok'?'✓':'✗'} ${el.element}</span>
+    </div>`;
+  }).join('');
+  return `<div class="pdf-wrap"><img class="pdf-img" src="${uploadedURL}" alt="Packaging artwork"><div>${ovrs}</div></div>
+    <div class="pdf-legend">
+      <div class="leg-item"><span class="leg-sw" style="background:rgba(0,229,160,.25);border:2px solid #00e5a0"></span>Compliant</div>
+      <div class="leg-item"><span class="leg-sw" style="background:rgba(255,68,68,.18);border:2px solid #ff4444"></span>Flagged</div>
+    </div>`;
+}
+
+function addLog(agent, step, detail, status) {
+  agentLog.push({ agent, step, detail, status });
+}
+
+function renderLog(log) {
+  if (!log.length) return `<div style="padding:18px;text-align:center;color:var(--faint);font-size:10px;font-family:var(--mono)">No agent activity yet</div>`;
+  const clrs = { info:'#4a90d9', running:'#f5a623', success:'#00e5a0', warning:'#f5a623', error:'#ff4444' };
+  const pfxs = { info:'ℹ', running:'⟳', success:'✓', warning:'⚠', error:'✗' };
+  return `<div class="log">${log.map(e=>{
+    const c = clrs[e.status]||'#4a90d9'; const p = pfxs[e.status]||'ℹ';
+    return `<div class="log-entry" style="--log-clr:${c}">
+      <span class="log-pfx">${p}</span>
+      <div><div style="display:flex;gap:5px;align-items:center;margin-bottom:2px">
+        <span class="log-agent">${e.agent}</span><span class="log-div">›</span><span class="log-step">${e.step}</span>
+      </div><div class="log-detail">${e.detail}</div></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function updateLogDisplay() {
+  document.getElementById('tab-log').innerHTML = renderLog(agentLog);
+}
+
+function showLog() {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsPanel').style.display = '';
+  document.getElementById('tab-log').innerHTML = renderLog(agentLog);
+}
+
+function setRunning(on) {
+  const btn = document.getElementById('runBtn');
+  btn.disabled = on;
+  btn.innerHTML = on
+    ? '<div class="spin"></div> RUNNING AGENTS...'
+    : '⊛ RUN COMPLIANCE CHECK';
+}
+function showErr(m) { const e = document.getElementById('errMsg'); e.style.display=''; e.textContent='⚠ '+m; }
+function clearErr()  { document.getElementById('errMsg').style.display='none'; }
+</script>
+</body>
+</html>
