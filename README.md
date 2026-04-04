@@ -1,6 +1,8 @@
 # 🔬 PharmaGuard — Multilingual Packaging & Labeling Compliance Agent
 
-> **Hackathon Project** | Agentic AI Track | Built with Claude claude-sonnet-4-20250514
+> **Personal Project by Anupam** | Gen AI Developer | Built with Claude claude-sonnet-4-20250514
+>
+> *A personal initiative exploring how agentic AI can solve a real regulatory challenge in the pharmaceutical industry — with direct applicability to Baxter's global packaging operations.*
 
 A multimodal AI agent that acts as a global pharmaceutical packaging auditor — comparing the "Source of Truth" English label against regional packaging artwork in any language.
 
@@ -10,12 +12,14 @@ A multimodal AI agent that acts as a global pharmaceutical packaging auditor —
 
 ## 🎯 The Problem
 
-When a new safety warning or dosage update is mandated for a widely-used generic drug (like Viatris's Ibuprofen portfolio), the company must update packaging and inserts across **dozens of countries**. This involves:
+In global pharmaceutical companies like **Baxter**, when a new safety warning or dosage update is mandated for a widely-used drug, the company must update packaging and inserts across **dozens of countries**. This involves:
 
 - Translating medical text into 20+ languages
-- Verifying that local marketing teams haven't accidentally altered the **core medical meaning**
+- Verifying that local marketing or regulatory teams haven't accidentally altered the **core medical meaning**
 - Reviewing PDF artwork for font size, warning placement, and regulatory symbols
 - A tedious, error-prone **manual review process** taking weeks per cycle
+
+I built PharmaGuard as a personal proof-of-concept to demonstrate how this entire pipeline can be automated with two specialized AI agents — with the goal of eventually piloting this within Baxter's Global Regulatory Affairs or Labeling Operations teams.
 
 **PharmaGuard automates this entire pipeline with two specialized AI agents.**
 
@@ -137,15 +141,15 @@ pharma-guard/
 
 ---
 
-## 🎬 Demo Flow (Hackathon Pitch)
+## 🎬 Demo Flow
 
-1. **Paste** the approved master English Ibuprofen label (pre-loaded)
+1. **Paste** the approved master English label (pre-loaded with an Ibuprofen example)
 2. **Select** target language: French
-3. **Upload** `demo/sample_labels/french_label_with_issue.txt` (or any packaging image)
+3. **Upload** a packaging image or use the pre-loaded French text sample
 4. **Click** "Run Compliance Check"
 5. Watch both agents run sequentially in the **Agent Log** tab
 6. See the **annotated artwork** with green/red bounding boxes
-7. Review the **Compliance Report** showing the omitted renal impairment warning as CRITICAL
+7. Review the **Compliance Report** — flags the omitted renal impairment warning as `🔴 CRITICAL` and the incorrect dosage cap as `🟠 MAJOR`
 
 ---
 
@@ -203,14 +207,22 @@ pharma-guard/
 
 ---
 
-## 💡 Extension Ideas (Post-Hackathon)
+## 💡 Potential at Baxter
+
+This tool was designed with Baxter's operational context in mind. Possible integration paths:
+
+- **Plug into Baxter's regulatory document management system** — trigger compliance checks automatically when local teams upload revised artwork
+- **Azure OpenAI backend** — swap Claude API for Azure OpenAI (GPT-4o) to stay within Baxter's approved cloud infrastructure
+- **Power Automate integration** — trigger compliance checks as part of the artwork approval workflow
+- **Batch processing** — analyze all country variants for a product in a single scheduled run
+- **Audit trail** — log all compliance reviews to SharePoint or Baxter's document management system for regulatory traceability
+- **Teams/Outlook notifications** — alert the Global Labeling team when a critical flag is raised, using Power Automate flows I've already built at Baxter
+
+## 💡 General Extension Ideas
 
 - **PDF.js integration** for true multi-page PDF rendering with overlays
-- **Regulatory rule engine** — load country-specific rule JSON files
-- **Batch processing** — analyze all 50 country variants in one run
-- **Audit trail** — Supabase-backed history of all compliance reviews
-- **Change-diff view** — highlight exactly which words changed meaning
-- **Microsoft Teams / Slack alerts** for critical failures
+- **Regulatory rule engine** — load country-specific rule JSON files per market
+- **Change-diff view** — highlight exactly which words changed meaning between versions
 
 ---
 
@@ -226,12 +238,16 @@ pharma-guard/
 
 ## 👤 Author
 
-Built for **Viatris Global Packaging Hackathon** by the GenAI team.
+**Anupam** — Gen AI Developer at Baxter, Bengaluru
 
-> *"The difference between a compliant label and a non-compliant one can mean patient safety. We built PharmaGuard to make that review instantaneous."*
+This is a personal project built independently to explore agentic AI applications in the pharmaceutical/healthcare space. It is not an official Baxter product or initiative.
+
+- GitHub: [github.com/anupaminnit](https://github.com/anupaminnit)
+
+> *"The difference between a compliant label and a non-compliant one can mean patient safety. I built PharmaGuard to demonstrate how that review can be made instantaneous and scalable."*
 
 ---
 
 ## 📄 License
 
-MIT
+MIT — free to use, adapt, and build upon.
