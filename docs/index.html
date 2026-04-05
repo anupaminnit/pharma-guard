@@ -152,16 +152,16 @@ pre.bt{font-family:var(--mono);font-size:9.5px;line-height:1.6;color:var(--muted
 
 <div id="apiKeyBanner" style="background:#0d1220;border-bottom:1px solid #2a3558;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
   <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:#7a8aaa;letter-spacing:.08em;white-space:nowrap">🔑 ANTHROPIC API KEY</span>
-  <input id="apiKeyInput" type="password" placeholder="sk-ant-..." 
+  <input id="apiKeyInput" type="password" placeholder="AIzaSy..." 
     style="flex:1;min-width:260px;background:#161b2a;border:1px solid #2a3558;border-radius:5px;color:#e8ecf4;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 10px;outline:none"
-    oninput="localStorage.setItem('pg_apikey',this.value)"
+    oninput="localStorage.setItem('pg_gemini_key',this.value)"
   >
-  <span style="font-size:10px;color:#454e68;font-family:'IBM Plex Mono',monospace">Get yours at console.anthropic.com · Stored locally in your browser only</span>
+  <span style="font-size:10px;color:#454e68;font-family:'IBM Plex Mono',monospace">Free tier — get yours at aistudio.google.com · Stored locally in your browser only</span>
 </div>
 
 <script>
   window.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('pg_apikey');
+    const saved = localStorage.getItem('pg_gemini_key');
     if (saved) document.getElementById('apiKeyInput').value = saved;
   });
 </script>
@@ -176,7 +176,7 @@ pre.bt{font-family:var(--mono);font-size:9.5px;line-height:1.6;color:var(--muted
   </div>
   <div class="hdr-right">
     <span class="badge badge-live">● LIVE DEMO</span>
-    <span class="badge">Powered by Claude claude-sonnet-4-20250514</span>
+    <span class="badge">Powered by Gemini 1.5 Flash (Free)</span>
   </div>
 </header>
 
@@ -382,31 +382,31 @@ async function runAnalysis() {
       : [{ role: 'user', content: prompt }];
 
     const apiKey = document.getElementById('apiKeyInput').value.trim();
-    if (!apiKey) { throw new Error('Enter your Anthropic API key in the field above before running.'); }
+    if (!apiKey) { throw new Error('Enter your Google Gemini API key in the field above before running.'); }
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    // Build Gemini request parts
+    const parts = [];
+    if (imageContent) {
+      parts.push({ inlineData: { mimeType: imageContent.mt, data: imageContent.b64 } });
+    }
+    parts.push({ text: SYSTEM_PROMPT + '\n\n' + prompt });
+
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4096,
-        system: SYSTEM_PROMPT,
-        messages
+        contents: [{ parts }],
+        generationConfig: { maxOutputTokens: 4096, temperature: 0.1 }
       })
     });
 
     if (!resp.ok) {
       const e = await resp.json();
-      throw new Error(e.error?.message || 'API error');
+      throw new Error(e.error?.message || 'Gemini API error');
     }
 
     const data = await resp.json();
-    const raw = data.content[0].text;
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
     const result = parseJSON(raw);
     analysisResult = result;
 
