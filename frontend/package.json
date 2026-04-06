@@ -14,7 +14,11 @@
     "lucide-react": "^0.469.0",
     "framer-motion": "^11.15.0",
     "react-dropzone": "^14.3.5",
-    "axios": "^1.7.9"
+    "axios": "^1.7.9",
+    "pdfjs-dist": "^4.0.379",
+    "diff-match-patch": "^1.0.5",
+    "jspdf": "^2.5.1",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
