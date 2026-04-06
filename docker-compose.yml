@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+
+  # ── PostgreSQL database ───────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB:       pharma_guard
+      POSTGRES_USER:     pharma
+      POSTGRES_PASSWORD: pharma
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharma -d pharma_guard"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Redis (Celery broker + result backend) ────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # ── FastAPI backend ────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://pharma:pharma@postgres:5432/pharma_guard
+      REDIS_URL:    redis://redis:6379/0
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app    # live reload in dev; remove in production
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ── Celery worker ─────────────────────────────────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://pharma:pharma@postgres:5432/pharma_guard
+      REDIS_URL:    redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A tasks.celery_app worker --loglevel=info --concurrency=4 -Q compliance
+
+  # ── React frontend ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

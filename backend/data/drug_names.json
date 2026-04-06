@@ -1,0 +1,84 @@
+{
+  "_comment": "INN → brand names and local language equivalents. Used to avoid false-positive discrepancies when a regional label uses a brand name or local generic name instead of the INN.",
+  "ibuprofen": {
+    "inn": "ibuprofen",
+    "brand": ["Nurofen", "Advil", "Brufen", "Motrin", "Ibuprom", "Dolgit", "Moment"],
+    "local": {
+      "fr": ["ibuprofène"],
+      "de": ["Ibuprofen"],
+      "ja": ["イブプロフェン"],
+      "es": ["ibuprofeno"],
+      "pt": ["ibuprofeno"],
+      "zh": ["布洛芬"],
+      "ar": ["إيبوبروفين"],
+      "ru": ["ибупрофен"],
+      "it": ["ibuprofene"],
+      "ko": ["이부프로펜"]
+    }
+  },
+  "paracetamol": {
+    "inn": "paracetamol",
+    "brand": ["Tylenol", "Panadol", "Calpol", "Efferalgan", "Doliprane"],
+    "synonyms": ["acetaminophen"],
+    "local": {
+      "fr": ["paracétamol"],
+      "de": ["Paracetamol"],
+      "ja": ["アセトアミノフェン"],
+      "es": ["paracetamol", "acetaminofén"],
+      "pt": ["paracetamol"],
+      "zh": ["对乙酰氨基酚"],
+      "ar": ["باراسيتامول"],
+      "ru": ["парацетамол"],
+      "it": ["paracetamolo"],
+      "ko": ["파라세타몰"]
+    }
+  },
+  "amoxicillin": {
+    "inn": "amoxicillin",
+    "brand": ["Amoxil", "Augmentin", "Trimox", "Moxatag"],
+    "local": {
+      "fr": ["amoxicilline"],
+      "de": ["Amoxicillin"],
+      "ja": ["アモキシシリン"],
+      "es": ["amoxicilina"],
+      "pt": ["amoxicilina"],
+      "zh": ["阿莫西林"],
+      "ar": ["أموكسيسيلين"],
+      "ru": ["амоксициллин"],
+      "it": ["amoxicillina"],
+      "ko": ["아목시실린"]
+    }
+  },
+  "metformin": {
+    "inn": "metformin",
+    "brand": ["Glucophage", "Fortamet", "Glumetza", "Riomet"],
+    "local": {
+      "fr": ["metformine"],
+      "de": ["Metformin"],
+      "ja": ["メトホルミン"],
+      "es": ["metformina"],
+      "pt": ["metformina"],
+      "zh": ["二甲双胍"],
+      "ar": ["ميتفورمين"],
+      "ru": ["метформин"],
+      "it": ["metformina"],
+      "ko": ["메트포르민"]
+    }
+  },
+  "atorvastatin": {
+    "inn": "atorvastatin",
+    "brand": ["Lipitor", "Torvast", "Atoris"],
+    "local": {
+      "fr": ["atorvastatine"],
+      "de": ["Atorvastatin"],
+      "ja": ["アトルバスタチン"],
+      "es": ["atorvastatina"],
+      "pt": ["atorvastatina"],
+      "zh": ["阿托伐他汀"],
+      "ar": ["أتورفاستاتين"],
+      "ru": ["аторвастатин"],
+      "it": ["atorvastatina"],
+      "ko": ["아토르바스타틴"]
+    }
+  }
+}
