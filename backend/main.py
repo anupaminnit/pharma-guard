@@ -10,6 +10,9 @@ import io
 from pathlib import Path
 from typing import Optional
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import anthropic
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -72,8 +75,25 @@ async def analyze_packaging(
 
     # Read and encode the uploaded file
     file_bytes = await packaging_pdf.read()
-    file_b64 = base64.standard_b64encode(file_bytes).decode("utf-8")
     file_type = packaging_pdf.content_type or "image/jpeg"
+
+    # Convert PDF to JPEG image for multimodal analysis — raw PDF bytes cannot be
+    # passed to Claude vision with media_type="image/jpeg"
+    if "pdf" in file_type.lower():
+        try:
+            from pdf2image import convert_from_bytes
+            pages = convert_from_bytes(file_bytes, first_page=1, last_page=1, dpi=150)
+            buf = io.BytesIO()
+            pages[0].save(buf, format="JPEG", quality=90)
+            file_bytes = buf.getvalue()
+            file_type = "image/jpeg"
+        except Exception as e:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Could not render PDF (ensure poppler is installed: brew install poppler): {e}",
+            )
+
+    file_b64 = base64.standard_b64encode(file_bytes).decode("utf-8")
 
     agent_log.append({
         "agent": "Orchestrator",
