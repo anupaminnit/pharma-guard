@@ -2,7 +2,7 @@
 
 > **Personal Project by Anupam** | Gen AI Developer | Built with Claude claude-sonnet-4-20250514
 >
-> *A personal initiative exploring how agentic AI can solve a real regulatory challenge in the pharmaceutical industry — with direct applicability to Baxter's global packaging operations.*
+> *A personal initiative exploring how agentic AI can solve a real regulatory challenge in the pharmaceutical industry — with direct applicability to  global packaging operations.*
 
 A multimodal AI agent that acts as a global pharmaceutical packaging auditor — comparing the "Source of Truth" English label against regional packaging artwork in any language.
 
@@ -12,14 +12,14 @@ A multimodal AI agent that acts as a global pharmaceutical packaging auditor —
 
 ## 🎯 The Problem
 
-In global pharmaceutical companies like **Baxter**, when a new safety warning or dosage update is mandated for a widely-used drug, the company must update packaging and inserts across **dozens of countries**. This involves:
+In global pharmaceutical companies , when a new safety warning or dosage update is mandated for a widely-used drug, the company must update packaging and inserts across **dozens of countries**. This involves:
 
 - Translating medical text into 20+ languages
 - Verifying that local marketing or regulatory teams haven't accidentally altered the **core medical meaning**
 - Reviewing PDF artwork for font size, warning placement, and regulatory symbols
 - A tedious, error-prone **manual review process** taking weeks per cycle
 
-I built PharmaGuard as a personal proof-of-concept to demonstrate how this entire pipeline can be automated with two specialized AI agents — with the goal of eventually piloting this within Baxter's Global Regulatory Affairs or Labeling Operations teams.
+I built PharmaGuard as a personal proof-of-concept to demonstrate how this entire pipeline can be automated with two specialized AI agents — with the goal of eventually piloting this within Global Regulatory Affairs or Labeling Operations teams.
 
 **PharmaGuard automates this entire pipeline with two specialized AI agents.**
 
@@ -212,11 +212,10 @@ pharma-guard/
 This tool was designed with Baxter's operational context in mind. Possible integration paths:
 
 - **Plug into Baxter's regulatory document management system** — trigger compliance checks automatically when local teams upload revised artwork
-- **Azure OpenAI backend** — swap Claude API for Azure OpenAI (GPT-4o) to stay within Baxter's approved cloud infrastructure
+- **Azure OpenAI backend** — swap Claude API for Azure OpenAI (GPT-4o) to stay within cloud infrastructure
 - **Power Automate integration** — trigger compliance checks as part of the artwork approval workflow
 - **Batch processing** — analyze all country variants for a product in a single scheduled run
-- **Audit trail** — log all compliance reviews to SharePoint or Baxter's document management system for regulatory traceability
-- **Teams/Outlook notifications** — alert the Global Labeling team when a critical flag is raised, using Power Automate flows I've already built at Baxter
+- **Audit trail** — log all compliance reviews for regulatory traceability
 
 ## 💡 General Extension Ideas
 
@@ -238,9 +237,9 @@ This tool was designed with Baxter's operational context in mind. Possible integ
 
 ## 👤 Author
 
-**Anupam** — Gen AI Developer at Baxter, Bengaluru
+**Anupam** — Developer, Bengaluru
 
-This is a personal project built independently to explore agentic AI applications in the pharmaceutical/healthcare space. It is not an official Baxter product or initiative.
+This is a personal project built independently to explore agentic AI applications in the pharmaceutical/healthcare space. 
 
 - GitHub: [github.com/anupaminnit](https://github.com/anupaminnit)
 
