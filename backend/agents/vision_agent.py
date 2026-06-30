@@ -81,7 +81,7 @@ LAYOUT_SCHEMA = """
 class VisionAgent:
     def __init__(self, client: anthropic.Anthropic):
         self.client = client
-        self.model = "claude-sonnet-4-20250514"
+        self.model = "claude-sonnet-4-6"
 
     def extract_text_from_image(
         self, image_b64: str, media_type: str, language: str = "French"

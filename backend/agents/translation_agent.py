@@ -69,7 +69,7 @@ ANALYSIS_SCHEMA = """
 class TranslationAgent:
     def __init__(self, client: anthropic.Anthropic):
         self.client = client
-        self.model = "claude-sonnet-4-20250514"
+        self.model = "claude-sonnet-4-6"
 
     def analyze(
         self,
